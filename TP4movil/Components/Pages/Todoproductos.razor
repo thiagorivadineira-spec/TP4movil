@@ -1,0 +1,124 @@
+﻿@page "/todoproductos"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using TP4movil.Models
+
+<div class="table-responsive">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Listado de Productos</h2>
+        <button class="btn btn-success" @onclick="agregarProducto">Agregar producto</button>
+    </div>
+
+   @if (lista == null || lista.Count == 0)
+{
+    <div class="alert alert-info">
+        Cargando productos...
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var item in lista)
+        {
+            <div class="col-12 col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow">
+
+                    <img src="@item.Image"
+                         class="card-img-top p-3"
+                         alt="@item.Title"
+                         style="height:250px; object-fit:contain;" />
+
+                    <div class="card-body">
+
+                        <h5 class="card-title">@item.Title</h5>
+
+                        <p class="card-text">
+                            <strong>Precio:</strong> $@item.Price
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Categoría:</strong> @item.Category
+                        </p>
+
+                        <p class="card-text">
+                            @(item.Description?.Length > 100
+                                ? item.Description.Substring(0, 100) + "..."
+                                : item.Description)
+                        </p>
+
+                    </div>
+
+                    <div class="card-footer bg-white border-0">
+                        <div class="d-grid gap-2">
+
+                            <button class="btn btn-primary btn-sm"
+                                    @onclick='() => Navigation.NavigateTo($"/verproducto/{item.Id}")'>
+                                Ver 
+                                </button>
+
+
+                            <button class="btn btn-warning btn-sm"
+                                    @onclick='() => Navigation.NavigateTo($"/editarproducto/{item.Id}")'>
+                                Editar
+                            </button>
+
+                            <button class="btn btn-danger btn-sm"
+                                    @onclick='() => EliminarProducto(item.Id)'>
+                                Eliminar
+                            </button>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+</div>
+
+@code {
+    private List<todo> lista = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            lista = await Http.GetFromJsonAsync<List<todo>>("products");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+    private void agregarProducto()
+    {
+        Navigation.NavigateTo("/crearproducto");
+    }
+
+    private async Task EliminarProducto(int id)
+    {
+        try
+        {
+            var respuesta = await Http.DeleteAsync($"products/{id}");
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                lista.RemoveAll(p => p.Id == id);
+            }
+            else
+            {
+                Console.WriteLine("Error al eliminar producto");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al eliminar producto: {ex.Message}");
+        }
+    }
+
+   
+}

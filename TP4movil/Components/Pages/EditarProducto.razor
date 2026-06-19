@@ -1,0 +1,59 @@
+﻿@page "/editarproducto/{id:int}"
+@using TP4movil.Models
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<div class="mb-3">
+    <label>Título</label>
+    <input class="form-control" @bind="producto.Title" />
+</div>
+
+<div class="mb-3">
+    <label>Precio</label>
+    <input class="form-control" type="number" @bind="producto.Price" />
+</div>
+
+<div class="mb-3">
+    <label>Categoría</label>
+    <input class="form-control" @bind="producto.Category" />
+</div>
+
+<div class="mb-3">
+    <label>Descripción</label>
+    <textarea class="form-control" @bind="producto.Description"></textarea>
+</div>
+
+<div class="mb-3">
+    <label>Imagen</label>
+    <input class="form-control" @bind="producto.Image" />
+</div>
+
+<button class="btn btn-warning"
+        @onclick="ActualizarProducto">
+    Actualizar
+</button>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        producto = await Http.GetFromJsonAsync<todo>($"products/{id}") ?? new todo();
+    }
+
+    private async Task ActualizarProducto()
+    {
+        var respuesta =
+            await Http.PutAsJsonAsync($"products/{id}", producto);
+
+        if (respuesta.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/todoproductos");
+        }
+    }
+
+    private todo producto = new();
+}

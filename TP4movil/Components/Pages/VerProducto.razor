@@ -1,0 +1,31 @@
+﻿@page "/verproducto/{id:int}"
+@using TP4movil.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@if (producto == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <h3>@producto.Title</h3>
+
+    <img src="@producto.Image"
+         style="max-width:300px" />
+
+    <p><strong>Precio:</strong> $@producto.Price</p>
+    <p><strong>Categoría:</strong> @producto.Category</p>
+    <p><strong>Descripción:</strong> @producto.Description</p>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private todo? producto;
+    protected override async Task OnInitializedAsync()
+    {
+        producto = await Http.GetFromJsonAsync<todo>($"products/{id}");
+    }
+}
+

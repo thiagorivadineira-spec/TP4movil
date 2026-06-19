@@ -1,0 +1,73 @@
+﻿@page "/crearproducto"
+@using TP4movil.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="mb-3">
+    <label>Título</label>
+    <input class="form-control" @bind="producto.Title" />
+</div>
+
+<div class="mb-3">
+    <label>Precio</label>
+    <input class="form-control" type="number" @bind="producto.Price" />
+</div>
+
+<div class="mb-3">
+    <label>Categoría</label>
+    <input class="form-control" @bind="producto.Category" />
+</div>
+
+<div class="mb-3">
+    <label>Descripción</label>
+    <textarea class="form-control" @bind="producto.Description"></textarea>
+</div>
+
+<div class="mb-3">
+    <label>Imagen (URL)</label>
+    <input class="form-control" @bind="producto.Image" />
+</div>
+
+<button class="btn btn-success" @onclick="GuardarProducto">
+    Guardar
+</button>
+
+@code {
+
+    private todo producto = new();
+
+    private void IrACrearProducto()
+    {
+        Navigation.NavigateTo("/crearproducto");
+    }
+
+    private async Task GuardarProducto()
+    {
+        bool confirmar = await JS.InvokeAsync<bool>(
+            "confirm",
+            "¿Desea crear este producto?");
+
+        if (!confirmar)
+            return;
+
+        try
+        {
+            var respuesta = await Http.PostAsJsonAsync("products", producto);
+
+            if (respuesta.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/todoproductos");
+            }
+            else
+            {
+                Console.WriteLine("Error al crear producto");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+}
